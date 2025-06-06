@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Weather App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+
+    <style>
+        :root {
+            --primary-blue: #4475ef;
+            --dark-blue: #050933;
+            --white-transparent: rgba(255, 255, 255, 0.25);
+            --background-blur: blur(5px);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", sans-serif;
+        }
+        body {
+            height: 100vh;
+            background: url("{{ image_url or url_for('static', filename='default_bg.jpg') }}") no-repeat center center fixed;
+            background-size: cover;
+            transition: background-image 1s ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 2rem;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: var(--background-blur);
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.7);
+            width: 100%;
+            max-width: 900px;
+            padding: 2rem;
+            color: var(--dark-blue);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+        form {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 0.6rem 1rem;
+            font-size: 1rem;
+            border-radius: 15px;
+            border: 2px solid var(--primary-blue);
+            outline: none;
+            color: var(--dark-blue);
+        }
+        input[type="text"]::placeholder {
+            color: var(--primary-blue);
+            font-weight: 500;
+        }
+        button.btn {
+            padding: 0.6rem 1.5rem;
+            border-radius: 15px;
+            border: 2px solid var(--primary-blue);
+            background-color: transparent;
+            color: var(--primary-blue);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        button.btn:hover {
+            background-color: var(--primary-blue);
+            color: white;
+            transform: translateY(-3px);
+        }
+        .alerts {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .alert {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .alert-danger {
+            background-color: #ffdddd;
+            color: #d8000c;
+            border: 1px solid #d8000c;
+        }
+        .alert-warning {
+            background-color: #fff4e5;
+            color: #9f6000;
+            border: 1px solid #9f6000;
+        }
+        .alert-info {
+            background-color: #d9edf7;
+            color: #31708f;
+            border: 1px solid #31708f;
+        }
+        .weather-main {
+            display: flex;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 1rem 2rem;
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .weather-main .left,
+        .weather-main .right {
+            flex: 1;
+            min-width: 250px;
+        }
+        .temp {
+            font-size: 3rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 0.3rem;
+        }
+        .city {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--primary-blue);
+        }
+        .icon img {
+            display: block;
+            margin: 0 auto;
+            width: 120px;
+            height: 120px;
+        }
+        .condition {
+            font-size: 1.2rem;
+            font-weight: 500;
+            text-align: center;
+            margin-top: -10px;
+        }
+        .details {
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+        .details div {
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .details i {
+            color: var(--primary-blue);
+            min-width: 20px;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .weather-main {
+                flex-direction: column;
+                align-items: center;
+            }
+            .weather-main .left,
+            .weather-main .right {
+                min-width: unset;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Weather App</h1>
+
+        <!-- Flash messages -->
+        <div class="alerts">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Search form -->
+        <form method="post" action="{{ url_for('pred') }}">
+            <input
+                type="text"
+                name="city"
+                placeholder="Enter city name"
+                value="{{ city or '' }}"
+                autocomplete="off"
+                required
+            />
+            <button class="btn" type="submit"><i class="fas fa-search"></i> Search</button>
+        </form>
+
+        {% if city %}
+        <div class="weather-main">
+            <div class="left">
+                <div class="temp">{{ temp }} &deg;C</div>
+                <div class="city">{{ city }}</div>
+                <div class="icon">
+                    <img src="https://openweathermap.org/img/wn/{{ icon }}@2x.png" alt="{{ description }}" />
+                </div>
+                <div class="condition">{{ description }}</div>
+            </div>
+
+            <div class="right details">
+                <div><i class="fas fa-tint"></i> Humidity: {{ humidity }}%</div>
+                <div><i class="fas fa-wind"></i> Wind Speed: {{ wind_speed }} m/s</div>
+                <div><i class="fas fa-temperature-high"></i> Max Temp: {{ max_temp }} &deg;C</div>
+                <div><i class="fas fa-temperature-low"></i> Min Temp: {{ min_temp }} &deg;C</div>
+                <div><i class="fas fa-tachometer-alt"></i> Pressure: {{ pressure }} hPa</div>
+                <div><i class="fas fa-cloud-rain"></i> Precipitation: {{ precipitation }} mm</div>
+                <div><i class="fas fa-cloud"></i> Cloudiness: {{ cloudiness }}%</div>
+                <div><i class="fas fa-sun"></i> Sunrise: {{ sunrise }}</div>
+                <div><i class="fas fa-moon"></i> Sunset: {{ sunset }}</div>
+                <div><i class="fas fa-calendar-alt"></i> {{ day }}</div>
+            </div>
+        </div>
+
+        {% if hot_alert %}
+            <div class="alert alert-warning" style="margin-top:1rem;">{{ hot_alert }}</div>
+        {% endif %}
+        {% if cold_alert %}
+            <div class="alert alert-info" style="margin-top:1rem;">{{ cold_alert }}</div>
+        {% endif %}
+        {% endif %}
+    </div>
+</body>
+</html>
