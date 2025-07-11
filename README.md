@@ -19,7 +19,11 @@ Utilities: requests, os, datetime, environment variable handling
 🌍 Search weather by city name with live data
 
 🌦 Displays temperature, humidity, wind speed, cloudiness, precipitation, pressure, and sunrise/sunset times
+
 🏙 Dynamic cityscape background images using Google API
+
 ⚠️ Alerts for extreme weather (very hot or cold conditions)
+
 ✅ Input validation and graceful error handling
+
 🔒 API keys handled via environment variables
